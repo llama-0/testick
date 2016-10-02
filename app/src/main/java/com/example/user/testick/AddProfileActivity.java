@@ -12,6 +12,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -30,6 +33,8 @@ public class AddProfileActivity extends AppCompatActivity {
 
     private StorageReference mStorage;
 
+    private DatabaseReference mDatabase;
+
     private ProgressDialog mProgress;
 
     private static final int GALLERY_REQUEST = 1;
@@ -40,6 +45,7 @@ public class AddProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_profile);
 
         mStorage = FirebaseStorage.getInstance().getReference();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Profile");
 
         mProgress = new ProgressDialog(this);
 
@@ -54,7 +60,6 @@ public class AddProfileActivity extends AppCompatActivity {
         mSelectImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
 
                 Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 galleryIntent.setType("image/*");
@@ -77,9 +82,9 @@ public class AddProfileActivity extends AppCompatActivity {
         mProgress.setMessage("Profile is in progress...");
         mProgress.show();
 
-        String name = mNameField.getText().toString().trim();
-        String profession = mProfessionField.getText().toString().trim();
-        String about = mAboutYourselfField.getText().toString().trim();
+        final String name = mNameField.getText().toString().trim();
+        final String profession = mProfessionField.getText().toString().trim();
+        final String about = mAboutYourselfField.getText().toString().trim();
 
         if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(profession) && !TextUtils.isEmpty(about) && mImageUri != null) {
 
@@ -90,7 +95,18 @@ public class AddProfileActivity extends AppCompatActivity {
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
                     Uri downloadUri = taskSnapshot.getDownloadUrl();
+
+                    DatabaseReference newProfile = mDatabase.push();
+
+                    newProfile.child("name").setValue(name);
+                    newProfile.child("profession").setValue(profession);
+                    newProfile.child("about").setValue(about);
+                    newProfile.child("image").setValue(downloadUri.toString());
+
                     mProgress.dismiss();
+
+                    startActivity(new Intent(AddProfileActivity.this, AccountActivity.class));
+
                 }
             });
         }
