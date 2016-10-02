@@ -14,8 +14,7 @@
         android:text="LogOut"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="97dp"
-        android:id="@+id/logOutBtn" />
+        android:id="@+id/logOutBtn"
+        android:layout_alignParentTop="true" />
 </RelativeLayout>
